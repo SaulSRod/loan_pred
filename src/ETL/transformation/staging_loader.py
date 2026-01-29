@@ -29,7 +29,7 @@ def faster_to_sql(df_name: str, engine: Engine, df: pd.DataFrame, table_name: st
         cursor = conn.cursor()
 
         print(f"[staging_loader] writing {df_name} to {table_name} using STRINGIO")
-        cursor.copy_from(output, table = "staging_accepted_hdma", sep = ",", null = "", columns = columns)
+        cursor.copy_from(output, table = table_name, sep = ",", null = "", columns = columns)
         conn.commit()
         cursor.close()
         conn.close()
@@ -41,7 +41,7 @@ def faster_to_sql(df_name: str, engine: Engine, df: pd.DataFrame, table_name: st
         return len(df)
 
     except Exception as e:
-        print(f"Error in staging_loader.py -> write_df_to_table: {e}")
+        print(f"Error in staging_loader.py -> faster_to_sql when trying to load {df_name} to {table_name}: {e}")
 
 # load staging hdma table faster by using memory instead of df.to_sql-------------
 def load_hdma_staging(sample: bool = True,seed: int = 0,engine: Optional[Engine] = None,) -> None:
@@ -71,21 +71,22 @@ def load_hdma_staging(sample: bool = True,seed: int = 0,engine: Optional[Engine]
         inserted_acc = faster_to_sql(df_name = "HDMA_accepted", engine = engine, df = accepted_stage, table_name = "staging_accepted_hdma", columns = accepted_cols)
         print(f"[staging_loader] Inserted {inserted_acc} rows inside staging_accepted_hdma")
     except Exception as e:
-        print(f"Error in staging_loader.py -> write_df_to_table: {e}")
+        print(f"Error in staging_loader.py -> load_hdma_staging (accepted): {e}")
 
     #load rejected data
     rejected_cols = ['activity_year', 'action_taken', 'preapproval', 'loan_purpose', 'loan_amount', 'loan_term', 'applicant_credit_score_type',
         'co_applicant_credit_score_type', 'denial_reason_1', 'loan_to_value_ratio', 'income', 'debt_to_income_ratio', 'derived_loan_product_type']
     rejected_stage = rejected_df[rejected_cols].copy()
     try:
-        print("writing df to sql table -> staging_rejected_hdma")
-        inserted_rejec = faster_to_sql("HDMA_rejected", engine = engine, df = rejected_stage, table_name="staging_rejected_hdma", columns= rejected_cols)
+        inserted_rejec = faster_to_sql(df_name = "HDMA_rejected", engine = engine, df = rejected_stage, table_name="staging_rejected_hdma", columns= rejected_cols)
         print(f"[staging_loader] Inserted {inserted_rejec} rows inside staging_rejected_hdma")
     except Exception as e:
-        print(f"Error in staging_loader.py -> write_df_to_table: {e}")
+        print(f"Error in staging_loader.py -> load_hdma_staging (rejected): {e}")
+        print(list(rejected_stage.columns))
+        print(rejected_cols)
 
 if __name__ == "__main__":
-    engine = create_engine("postgresql+psycopg2:///credit_risk", executemany_mode="values_plus_batch", insertmanyvalues_page_size=100000, executemany_batch_page_size=100000)
+    engine = create_engine("postgresql+psycopg2:///credit_risk", executemany_mode="values_plus_batch", insertmanyvalues_page_size=10000, executemany_batch_page_size=10000)
 
     print("=== Loading HDMA staging tables ===")
     
