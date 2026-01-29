@@ -86,12 +86,12 @@ def load_hdma_staging(sample: bool = True,seed: int = 0,engine: Optional[Engine]
 
 if __name__ == "__main__":
     engine = create_engine("postgresql+psycopg2:///credit_risk", executemany_mode="values_plus_batch", insertmanyvalues_page_size=100000, executemany_batch_page_size=100000)
-    load_hdma_staging(sample = False, engine = engine)
 
-    '''
-    
     print("=== Loading HDMA staging tables ===")
-    load_hdma_staging(sample=False, engine=engine)
+    
+    load_hdma_staging(sample = False, engine = engine)
+    
+    print("=== HDMA staging table populated ===")
 
-    print("=== HDMA staging table populated ===")    
+    ''' 
     '''
