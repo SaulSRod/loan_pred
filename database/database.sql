@@ -15,35 +15,58 @@ DROP TABLE IF EXISTS Rejected CASCADE;
 
 -- customers table
 CREATE TABLE Borrowers (
-    application_id                  BIGSERIAL PRIMARY KEY, -- auto gen
+    borrower_id                     BIGSERIAL PRIMARY KEY, -- auto gen
+    action_taken                    SMALLINT,
     preapproval                     SMALLINT,
-    applicant_credit_score_type     SMALLINT,     
-    co_applicant_credit_score_type  SMALLINT,
-    derived_loan_product_type       TEXT,
-    loan_purpose                    SMALLINT,  
+    loan_purpose                    SMALLINT,
+    derived_loan_product_type       TEXT
 
     created_at                      TIMESTAMPTZ DEFAULT now() -- records when borrower is entered into system
 );
 
 -- accepted table
 CREATE TABLE Accepted_Loans (
-    application_id                  BIGINT NOT NULL REFERENCES borrowers(application_id),
-    income                          NUMERIC(12,2),
-    dti                             NUMERIC(12,2),
-    loan_to_value_ratio             NUMERIC(10,2),
-    loan_amount                     NUMERIC(12,2),
-    term_months                     NUMERIC(6,0)
+    --PK
+    accepted_id                     BIGSERIAL PRIMARY KEY,
+    --FK
+    borrower_id                     INTEGER NOT NULL REFERENCES borrowers(application_id),
+    
+    activity_year                   SMALLINT,
+    action_taken                    SMALLINT,
+    preapproval                     SMALLINT,
+    loan_purpose                    SMALLINT,
+    loan_amount                     DECIMAL (16,4),
+    loan_term                       DECIMAL (16,4),
+    applicant_credit_score_type     SMALLINT,   
+
+    co_applicant_credit_score_type  SMALLINT,
+    loan_to_value_ratio             DECIMAL (16,4),
+    income                          DECIMAL (16,4),
+    debt_to_income_ratio            DECIMAL (16,4),    
+    derived_loan_product_type       TEXT
 );
 
 -- rejected table 
 CREATE TABLE Rejected ( 
-    application_id                  BIGINT NOT NULL REFERENCES borrowers(application_id),
-    income                          NUMERIC(12,2),
-    dti                             NUMERIC(12,2),
-    loan_to_value_ratio             NUMERIC(10,2), 
-    loan_amount                     NUMERIC(12,2),
-    term_months                     NUMERIC(6,0),
-    denial_reason_1                 SMALLINT
+    --PK
+    rejection_id                    BIGSERIAL PRIMARY KEY,
+    --FK
+    borrower_id                     INTEGER NOT NULL REFERENCES borrowers(application_id),
+
+    activity_year                   SMALLINT,
+    action_taken                    SMALLINT,
+    preapproval                     SMALLINT,
+    loan_purpose                    SMALLINT,
+    loan_amount                     DECIMAL (18,4),
+    loan_term                       DECIMAL (18,4),
+    applicant_credit_score_type     SMALLINT,   
+
+    co_applicant_credit_score_type  SMALLINT,
+    denial_reason_1                 SMALLINT,
+    loan_to_value_ratio             DECIMAL (18,4),
+    income                          DECIMAL (18,4),
+    debt_to_income_ratio            DECIMAL (16,4), 
+    derived_loan_product_type       TEXT  
 );
 
 -- ml table?

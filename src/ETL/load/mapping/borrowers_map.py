@@ -6,16 +6,14 @@ def map_accepted_borrowers(engine: Engine) -> None:
     sql = text("""
         INSERT INTO Borrowers (
             action_taken                    SMALLINT,
-            loan_purpose                    SMALLINT,
             preapproval                     SMALLINT,
-            applicant_credit_score_type     SMALLINT,     
+            loan_purpose                    SMALLINT,
             derived_loan_product_type       TEXT
         )
         SELECT DISTINCT
             vah.action_taken,
-            vah.loan_purpose,
             vah.preapproval,
-            vah.applicant_credit_score_type,
+            vah.loan_purpose,
             vah.derived_loan_product_type
             
         FROM valid_accepted_hdma vah;
@@ -30,16 +28,14 @@ def map_rejected_borrowers(engine: Engine) -> None:
     sql = text("""
         INSERT INTO Borrowers (
             action_taken                    SMALLINT,
-            loan_purpose                    SMALLINT,
             preapproval                     SMALLINT,
-            applicant_credit_score_type     SMALLINT,     
+            loan_purpose                    SMALLINT,
             derived_loan_product_type       TEXT
         )
         SELECT DISTINCT
             vrh.action_taken,
-            vrh.loan_purpose,
             vrh.preapproval,
-            vrh.applicant_credit_score_type,
+            vrh.loan_purpose,
             vrh.derived_loan_product_type
                
         FROM valid_rejected_hdma vrh;
