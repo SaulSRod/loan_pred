@@ -2,8 +2,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
-import pandas as pd
-from typing import Optional, Dict
 
 def create_valid_accepted_hdma(engine: Engine) -> None:
     sql = text("""
@@ -11,20 +9,19 @@ def create_valid_accepted_hdma(engine: Engine) -> None:
 
     CREATE OR REPLACE VIEW valid_accepted_hdma AS
     SELECT
-        loan_amount,
-        loan_term, 
-        interest_rate,
-        income,
-        debt_to_income_ratio,         
-        applicant_credit_score_type,
-        co_applicant_credit_score_type,
         activity_year,
         action_taken,
         preapproval,
+        loan_purpose,
+        loan_amount,
+        loan_term,
+        applicant_credit_score_type,   
+
+        co_applicant_credit_score_type,
         loan_to_value_ratio,
-        total_loan_costs,
-        derived_loan_product_type,
-        loan_purpose
+        income,
+        debt_to_income_ratio,    
+        derived_loan_product_type
 
     FROM staging_accepted_hdma
     WHERE
@@ -46,7 +43,6 @@ def create_valid_accepted_hdma(engine: Engine) -> None:
             'VA:First Lien',
             'FSA/RHS:First Lien'
         )
-        AND loan_purpose IS NOT NULL
         AND loan_purpose IN (1,31,32);
     """)
 
@@ -59,6 +55,7 @@ def create_valid_rejected_hdma(engine: Engine) -> None:
 
     CREATE OR REPLACE VIEW valid_rejected_hdma AS
     SELECT
+        rejected_id,
         activity_year,
         action_taken,      
         preapproval,
@@ -101,9 +98,7 @@ def create_valid_rejected_hdma(engine: Engine) -> None:
 def confirm_lengths(engine: Engine) -> None:
     queries = {
         "valid_accepted_hdma": "SELECT COUNT(*) FROM valid_accepted_hdma",
-        "valid_accepted_kaggle": "SELECT COUNT(*) FROM valid_accepted_kaggle",
         "valid_rejected_hdma": "SELECT COUNT(*) FROM valid_rejected_hdma",
-        "valid_rejected_kaggle": "SELECT COUNT(*) FROM valid_rejected_kaggle",
     }
 
     with engine.connect() as conn:

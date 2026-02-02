@@ -27,6 +27,7 @@ CREATE TABLE staging_accepted_hdma (
 
 CREATE TABLE staging_rejected_hdma (
     -- ['activity_year', 'action_taken', 'preapproval', 'loan_purpose', 'loan_amount', 'loan_term', 'applicant_credit_score_type', 'co_applicant_credit_score_type', 'denial_reason_1', 'loan_to_value_ratio', 'income', 'debt_to_income_ratio', 'derived_loan_product_type']
+    rejected_id                     BIGSERIAL PRIMARY KEY,
     activity_year                   SMALLINT,
     action_taken                    SMALLINT,
     preapproval                     SMALLINT,
