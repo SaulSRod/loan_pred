@@ -34,8 +34,7 @@ def create_accepted_loans_training_view(engine: Optional[Engine] = None) -> None
         CREATE VIEW {VIEW_NM} AS
         SELECT
             -- ids, primary key
-            al.loan_id,
-            al.borrower_id,
+            b.borrower_id,
 
             CASE
                 WHEN al.loan_status IN ('Charged Off', 'Default', 'Late (31-120 days)')
@@ -46,22 +45,16 @@ def create_accepted_loans_training_view(engine: Optional[Engine] = None) -> None
             END AS is_default,
 
             -- numerics
-            al.loan_amnt,
-            al.installment,
-            al.dti,
-            al.income,
-            al.term_months,
+            b.loan_amount,
+            b.debt_to_income_ratio,
+            b.income,
+            b.loan_term,
 
             -- cats
-            al.purpose
-        FROM Accepted_Loans al
+            b.loan_purpose
+        FROM Borrowers b
         -- drops
-        WHERE al.loan_status IN (
-            'Charged Off',
-            'Default',
-            'Late (31-120 days)',
-            'Fully Paid',
-            'Current'
+        WHERE b.action_taken = 1
         );
         """
     )
