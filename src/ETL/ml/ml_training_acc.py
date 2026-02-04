@@ -13,7 +13,7 @@ dropped -- empty/NULL, Does not meet the credit policy. Status:, In Grace Period
 OUTPUT/PRINT
 
 Created view: accepted_loans_ml_training
-accepted_loans_ml_training -> total=81460, defaults(1)=10095, non_defaults(0)=71365
+accepted_loans_ml_training -> total=3750051, is_rejected(0)=2771562, is_rejected(1)=978489
 
 """
 
@@ -36,13 +36,16 @@ def create_accepted_loans_training_view(engine: Optional[Engine] = None) -> None
             -- ids, primary key
             b.borrower_id,
 
+            -- accepted/rejected column
             CASE
-                WHEN al.loan_status IN ('Charged Off', 'Default', 'Late (31-120 days)')
-                    THEN 1
-                WHEN al.loan_status IN ('Fully Paid', 'Current')
+                -- accepted
+                WHEN b.action_taken = 1
                     THEN 0
+                -- rejected
+                WHEN b.action_taken = 3
+                    THEN 1
                 ELSE NULL
-            END AS is_default,
+            END as is_rejected,
 
             -- numerics
             b.loan_amount,
@@ -53,9 +56,7 @@ def create_accepted_loans_training_view(engine: Optional[Engine] = None) -> None
             -- cats
             b.loan_purpose
         FROM Borrowers b
-        -- drops
-        WHERE b.action_taken = 1
-        );
+        WHERE b.activity_year = 2023;
         """
     )
 
@@ -76,16 +77,16 @@ def preview_training_counts(engine: Optional[Engine] = None) -> None:
         ).scalar()
 
         positives = conn.execute(
-            text(f"SELECT COUNT(*) FROM {VIEW_NM} WHERE is_default = 1")
+            text(f"SELECT COUNT(*) FROM {VIEW_NM} WHERE is_rejected = 0")
         ).scalar()
 
         negatives = conn.execute(
-            text(f"SELECT COUNT(*) FROM {VIEW_NM} WHERE is_default = 0")
+            text(f"SELECT COUNT(*) FROM {VIEW_NM} WHERE is_rejected = 1")
         ).scalar()
 
     print(
         f"{VIEW_NM} -> total={total}, "
-        f"defaults(1)={positives}, non_defaults(0)={negatives}"
+        f"is_rejected(0)={positives}, is_rejected(1)={negatives}"
     )
 
 if __name__ == "__main__":
